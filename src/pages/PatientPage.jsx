@@ -80,17 +80,17 @@ export default function PatientPage() {
               ₹{wallet?.balance?.toFixed(2) || "0.00"}
             </div>
             <div style={{ fontSize: '.85rem', color: 'var(--slate-400)' }}>
-              Approved commissions only
+              Approved credits only
             </div>
           </div>
 
           {/* Commission History */}
           <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ marginBottom: '1rem' }}>Commission History</h3>
+            <h3 style={{ marginBottom: '1rem' }}>Credit History</h3>
 
             {commissions.length === 0 && (
               <div style={{ color: 'var(--slate-400)' }}>
-                No commissions yet.
+                No credits yet.
               </div>
             )}
 
