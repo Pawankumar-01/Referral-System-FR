@@ -4,7 +4,9 @@ import {
   getAdminDashboard,
   markConsultationCompleteByPhone,
   markMedicineCompleteByPhone,
-  getPatientsOverview
+  getPatientsOverview,
+  getAllCommissions,
+  approveCommission
 } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { PageLoader, Alert, Spinner } from '../components/UI';
@@ -28,6 +30,9 @@ export default function AdminDashboardPage() {
   const [actionResult, setActionResult] = useState(null);
   const [actionError, setActionError] = useState('');
 
+  const [commissions, setCommissions] = useState([]);
+  const [approving, setApproving] = useState(null);
+
   useEffect(() => {
     if (!isAdminAuthed) {
       navigate('/admin/login');
@@ -35,6 +40,7 @@ export default function AdminDashboardPage() {
     }
     fetchStats();
     fetchPatients();
+    fetchCommissions();
   }, [isAdminAuthed]);
 
   const fetchStats = useCallback(() => {
@@ -49,6 +55,12 @@ export default function AdminDashboardPage() {
   const fetchPatients = useCallback(() => {
     getPatientsOverview()
       .then(setPatients)
+      .catch((err) => setError(err.message));
+  }, []);
+
+  const fetchCommissions = useCallback(() => {
+    getAllCommissions()
+      .then(setCommissions)
       .catch((err) => setError(err.message));
   }, []);
 
@@ -175,6 +187,51 @@ export default function AdminDashboardPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* COMMISSION APPROVAL SECTION */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <h3>Pending Commission Approvals</h3>
+
+        {commissions.filter(c => c.status === "credited").length === 0 && (
+          <div style={{ color: 'var(--slate-400)' }}>
+            No pending commissions.
+          </div>
+        )}
+
+        {commissions
+          .filter(c => c.status === "credited")
+          .map(c => (
+            <div
+              key={c.id}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '1rem',
+                border: '1px solid var(--slate-200)',
+                borderRadius: '8px',
+                marginBottom: '.75rem'
+              }}
+            >
+              <div>
+                <div style={{ fontWeight: 600 }}>
+                  ₹{c.commission_amount.toFixed(2)}
+                </div>
+                <div style={{ fontSize: '.8rem', color: 'var(--slate-400)' }}>
+                  Level {c.level} • Bill ₹{c.bill_amount}
+                </div>
+              </div>
+
+              <button
+                className="btn btn-primary btn-sm"
+                disabled={approving === c.id}
+                onClick={() => handleApprove(c.id)}
+              >
+                {approving === c.id ? <Spinner /> : "Approve"}
+              </button>
+            </div>
+          ))}
       </div>
 
       {/* ACTION PANEL */}

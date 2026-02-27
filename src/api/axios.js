@@ -110,11 +110,25 @@ export const markMedicineCompleteByPhone = ({
 // WALLET & COMMISSION (MLM)
 // ─────────────────────────────────────────────
 
+// GET wallet balance
 export const getWallet = (patientId) =>
-  api.get(`/wallet/${patientId}`).then((r) => r.data);
+  api.get(`/wallet/${patientId}`).then(r => r.data);
 
+// GET commission history
 export const getCommissionHistory = (patientId) =>
-  api.get(`/commission/${patientId}`).then((r) => r.data);
+  api.get(`/commission/${patientId}`).then(r => r.data);
+
+// POST claim commission
+export const claimCommission = (commissionId) =>
+  api.post(`/commission/claim/${commissionId}`).then(r => r.data);
+
+// GET all commissions (admin use)
+export const getAllCommissions = () =>
+  adminApi.get('/commission/all').then(r => r.data);
+
+// Approve commission
+export const approveCommission = (commissionId) =>
+  adminApi.post(`/admin/approve-commission/${commissionId}`).then(r => r.data);
 
 // ─────────────────────────────────────────────
 // NOTIFICATIONS
