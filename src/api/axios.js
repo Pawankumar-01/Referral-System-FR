@@ -128,7 +128,8 @@ export const getAllCommissions = () =>
 
 // Approve commission
 export const approveCommission = (commissionId) =>
-  adminApi.post(`/admin/approve-commission/${commissionId}`).then(r => r.data);
+  adminApi.post(`/admin/approve-commission/${commissionId}`)
+    .then(r => r.data);
 
 // ─────────────────────────────────────────────
 // NOTIFICATIONS
@@ -136,3 +137,6 @@ export const approveCommission = (commissionId) =>
 
 export const getNotifications = (patientId) =>
   api.get(`/notifications/${patientId}`).then((r) => r.data);
+
+export const getPortfolio = (patientId) =>
+  api.get(`/portfolio/${patientId}`).then(r => r.data);

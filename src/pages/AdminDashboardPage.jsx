@@ -33,6 +33,10 @@ export default function AdminDashboardPage() {
   const [commissions, setCommissions] = useState([]);
   const [approving, setApproving] = useState(null);
 
+  const [claimPatientId, setClaimPatientId] = useState('')
+  const [claimAmount, setClaimAmount] = useState('')
+  const [claimLoading, setClaimLoading] = useState(false)
+
   useEffect(() => {
     if (!isAdminAuthed) {
       navigate('/admin/login');
@@ -97,13 +101,52 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleApprove = async (commissionId) => {
+    setApproving(commissionId);
+
+    try {
+      await approveCommission(commissionId);
+
+      // refresh dashboard data
+      fetchCommissions();
+      fetchStats();
+
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setApproving(null);
+    }
+  };
+
+  const handleWalletClaim = async () => {
+  setClaimLoading(true)
+
+  try {
+
+    await adminApi.post("/admin/claim-wallet", {
+      phone: claimPhone,
+      amount: Number(claimAmount)
+    })
+
+    alert("Wallet claim successful")
+
+    setClaimAmount("")
+    setClaimPatientId("")
+
+  } catch (err) {
+    alert(err.message)
+  }
+
+  setClaimLoading(false)
+}
+
   const filteredPatients = patients.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.phone.includes(searchTerm)
   );
 
   if (!isAdminAuthed) return null;
-  if (loading) return <PageLoader />;
+  if (loading || !stats) return <PageLoader />;
 
   return (
     <div className="page-wrap page-wrap--wide" style={{ marginTop: '2rem' }}>
@@ -117,6 +160,7 @@ export default function AdminDashboardPage() {
         <button className="btn btn-secondary btn-sm" onClick={() => {
           fetchStats();
           fetchPatients();
+          fetchCommissions();
         }}>
           ↻ Refresh
         </button>
@@ -131,7 +175,8 @@ export default function AdminDashboardPage() {
           <StatCard label="Total Referrals" value={stats.total_referrals} icon="🔗" />
           <StatCard label="Consultations Done" value={stats.consultations_completed} icon="🩺" />
           <StatCard label="Medicines Done" value={stats.medicines_completed} icon="💊" />
-          <StatCard label="Commissions Processed" value={stats.commissions_processed} icon="💰" />
+          <StatCard label="Pending Approvals" value={stats.pending_commissions} icon="⏳" />
+          <StatCard label="Approved Commissions" value={stats.approved_commissions} icon="✅" />
         </div>
       )}
 
@@ -191,7 +236,10 @@ export default function AdminDashboardPage() {
 
       {/* COMMISSION APPROVAL SECTION */}
       <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3>Pending Commission Approvals</h3>
+        <h3>
+        Pending Commission Approvals
+        ({commissions.filter(c => c.status === "credited").length})
+        </h3>
 
         {commissions.filter(c => c.status === "credited").length === 0 && (
           <div style={{ color: 'var(--slate-400)' }}>
@@ -218,6 +266,10 @@ export default function AdminDashboardPage() {
                 <div style={{ fontWeight: 600 }}>
                   ₹{c.commission_amount.toFixed(2)}
                 </div>
+
+                <div style={{ fontSize: '.75rem', color: 'var(--slate-400)' }}>
+                  Status: {c.status}
+                </div>
                 <div style={{ fontSize: '.8rem', color: 'var(--slate-400)' }}>
                   Level {c.level} • Bill ₹{c.bill_amount}
                 </div>
@@ -232,6 +284,37 @@ export default function AdminDashboardPage() {
               </button>
             </div>
           ))}
+      </div>
+
+      <div className="card" style={{ marginBottom: "2rem" }}>
+        <h3>Claim Wallet Amount</h3>
+
+        <div className="form-group">
+          <label>Patient Phone</label>
+            <input
+              value={claimPhone}
+              onChange={(e)=>setClaimPhone(e.target.value)}
+              placeholder="Enter patient phone"
+            />
+        </div>  
+
+        <div className="form-group">
+          <label>Amount to Claim</label>
+          <input
+            type="number"
+            value={claimAmount}
+            onChange={(e)=>setClaimAmount(e.target.value)}
+            placeholder="Enter amount"
+          />
+        </div>
+
+        <button
+          className="btn btn-primary"
+          disabled={!claimPatientId || !claimAmount || claimLoading}
+          onClick={handleWalletClaim}
+        >
+          {claimLoading ? <Spinner/> : "Claim From Wallet"}
+        </button>
       </div>
 
       {/* ACTION PANEL */}

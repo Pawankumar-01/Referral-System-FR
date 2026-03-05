@@ -161,6 +161,7 @@ export default function HomePage() {
                   <label>Phone *</label>
                   <PhoneInput 
                     name="phone" 
+                    country={'in'}
                     value={form.phone} 
                     // Manually create a "fake" event object so handleChange stays happy
                     onChange={(value) => handleChange({ target: { name: 'phone', value } })} 
