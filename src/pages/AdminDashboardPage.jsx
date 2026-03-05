@@ -36,6 +36,9 @@ export default function AdminDashboardPage() {
   const [claimPatientId, setClaimPatientId] = useState('')
   const [claimAmount, setClaimAmount] = useState('')
   const [claimLoading, setClaimLoading] = useState(false)
+  const [claimPhone, setClaimPhone] = useState('');
+  const [claimAmount, setClaimAmount] = useState('');
+  const [claimLoading, setClaimLoading] = useState(false);
 
   useEffect(() => {
     if (!isAdminAuthed) {
@@ -119,26 +122,32 @@ export default function AdminDashboardPage() {
   };
 
   const handleWalletClaim = async () => {
-  setClaimLoading(true)
 
-  try {
+    if (!claimPhone || !claimAmount) {
+      alert("Enter phone and amount");
+      return;
+    }
 
-    await adminApi.post("/admin/claim-wallet", {
-      phone: claimPhone,
-      amount: Number(claimAmount)
-    })
+    setClaimLoading(true);
 
-    alert("Wallet claim successful")
+    try {
 
-    setClaimAmount("")
-    setClaimPatientId("")
+      await adminApi.post("/admin/claim-wallet", {
+        phone: claimPhone,
+        amount: Number(claimAmount)
+      });
 
-  } catch (err) {
-    alert(err.message)
-  }
+      alert("Wallet claim successful");
 
-  setClaimLoading(false)
-}
+      setClaimPhone('');
+      setClaimAmount('');
+
+    } catch (err) {
+      alert(err.message);
+    }
+
+    setClaimLoading(false);
+  };
 
   const filteredPatients = patients.filter((p) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -291,15 +300,15 @@ export default function AdminDashboardPage() {
 
         <div className="form-group">
           <label>Patient Phone</label>
-            <input
-              value={claimPhone}
-              onChange={(e)=>setClaimPhone(e.target.value)}
-              placeholder="Enter patient phone"
-            />
-        </div>  
+          <input
+            value={claimPhone}
+            onChange={(e)=>setClaimPhone(e.target.value)}
+            placeholder="Enter patient phone"
+          />
+        </div>
 
         <div className="form-group">
-          <label>Amount to Claim</label>
+          <label>Amount</label>
           <input
             type="number"
             value={claimAmount}
@@ -310,10 +319,10 @@ export default function AdminDashboardPage() {
 
         <button
           className="btn btn-primary"
-          disabled={!claimPatientId || !claimAmount || claimLoading}
+          disabled={claimLoading}
           onClick={handleWalletClaim}
         >
-          {claimLoading ? <Spinner/> : "Claim From Wallet"}
+          {claimLoading ? <Spinner/> : "Claim"}
         </button>
       </div>
 
