@@ -37,8 +37,7 @@ export default function AdminDashboardPage() {
   const [claimAmount, setClaimAmount] = useState('')
   const [claimLoading, setClaimLoading] = useState(false)
   const [claimPhone, setClaimPhone] = useState('');
-  const [claimAmount, setClaimAmount] = useState('');
-  const [claimLoading, setClaimLoading] = useState(false);
+
 
   useEffect(() => {
     if (!isAdminAuthed) {
