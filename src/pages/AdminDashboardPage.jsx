@@ -7,7 +7,7 @@ import {
   getPatientsOverview,
   getAllCommissions,
   approveCommission,
-  
+  claimWallet
 } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import { PageLoader, Alert, Spinner } from '../components/UI';
@@ -34,7 +34,6 @@ export default function AdminDashboardPage() {
   const [commissions, setCommissions] = useState([]);
   const [approving, setApproving] = useState(null);
 
-  const [claimPatientId, setClaimPatientId] = useState('')
   const [claimAmount, setClaimAmount] = useState('')
   const [claimLoading, setClaimLoading] = useState(false)
   const [claimPhone, setClaimPhone] = useState('');
@@ -132,15 +131,16 @@ export default function AdminDashboardPage() {
 
     try {
 
-      await adminApi.post("/admin/claim-wallet", {
-        phone: claimPhone,
-        amount: Number(claimAmount)
-      });
+      await claimWallet(claimPhone, Number(claimAmount));
 
       alert("Wallet claim successful");
 
       setClaimPhone('');
       setClaimAmount('');
+
+      fetchStats();
+      fetchPatients();
+      fetchCommissions();
 
     } catch (err) {
       alert(err.message);
