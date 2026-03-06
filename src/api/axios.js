@@ -119,8 +119,8 @@ export const getCommissionHistory = (patientId) =>
   api.get(`/commission/${patientId}`).then(r => r.data);
 
 // POST claim commission
-export const claimCommission = (commissionId) =>
-  api.post(`/commission/claim/${commissionId}`).then(r => r.data);
+// export const claimCommission = (commissionId) =>
+//   api.post(`/commission/claim/${commissionId}`).then(r => r.data);
 
 // GET all commissions (admin use)
 export const getAllCommissions = () =>
@@ -131,6 +131,12 @@ export const approveCommission = (commissionId) =>
   adminApi.post(`/admin/approve-commission/${commissionId}`)
     .then(r => r.data);
 
+
+// Claim wallet amount (admin triggered)
+export const claimWallet = (phone, amount) =>
+  adminApi
+    .post('/admin/claim-wallet', { phone, amount })
+    .then((r) => r.data);
 // ─────────────────────────────────────────────
 // NOTIFICATIONS
 // ─────────────────────────────────────────────
