@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { createPatient } from '../api/axios';
+import { createPatient, api } from '../api/axios';
 import { Alert, Spinner } from '../components/UI';
 import PhoneInput from 'react-phone-input-2';
 
@@ -12,6 +12,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(null); // PatientOut
+  const [lookupPhone, setLookupPhone] = useState('');
 
   // ── Patient lookup
   const [lookupId, setLookupId] = useState('');
@@ -185,28 +186,67 @@ export default function HomePage() {
               </form>
             )}
           </div>
+            {/* ─ Quick Links ─ */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
-          {/* ─ Quick Links ─ */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div className="card" style={{ flex: 1 }}>
-              <h3 style={{ marginBottom: '.75rem' }}>📋 Patient Lookup</h3>
-              <p style={{ fontSize: '.88rem', marginBottom: '1rem' }}>Find any patient by their UUID to view their profile, rewards, and notifications.</p>
-              <div className="lookup-form">
-                <input
-                  value={lookupId}
-                  onChange={(e) => setLookupId(e.target.value)}
-                  placeholder="Paste patient UUID…"
-                  style={{ flex: 1, padding: '.65rem .9rem', border: '1.5px solid var(--slate-200)', borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-body)', fontSize: '.95rem' }}
-                />
-                <button
-                  className="btn btn-primary btn-sm"
-                  disabled={!lookupId.trim()}
-                  onClick={() => navigate(`/patient/${lookupId.trim()}`)}
-                >
-                  Go
-                </button>
+              <div className="card" style={{ flex: 1 }}>
+                
+                <h3 style={{ marginBottom: '.75rem' }}>
+                  📋 Patient Lookup
+                </h3>
+
+                <p style={{ fontSize: '.88rem', marginBottom: '1rem' }}>
+                  Find any patient using their phone number to view their profile and rewards.
+                </p>
+
+                <div className="lookup-form">
+
+                  <input
+                    value={lookupPhone}
+                    onChange={(e) => setLookupPhone(e.target.value)}
+                    placeholder="Enter patient phone… eg. 91 98765 43210"
+                    style={{
+                      flex: 1,
+                      padding: '.65rem .9rem',
+                      border: '1.5px solid var(--slate-200)',
+                      borderRadius: 'var(--radius-sm)',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: '.95rem'
+                    }}
+                  />
+
+                  <button
+                    className="btn btn-primary btn-sm"
+                    disabled={!lookupPhone.trim()}
+                    onClick={async () => {
+
+                      try {
+
+                        const res = await api.get(`/patients/search?phone=${lookupPhone.trim()}`);
+
+                        if (!res.data.length) {
+                          alert("Patient not found");
+                          return;
+                        }
+
+                        const patient = res.data[0];
+
+                        navigate(`/patient/${patient.id}`);
+
+                      } catch (err) {
+                        alert("Search failed");
+                      }
+
+                    }}
+                  >
+                    Go
+                  </button>
+
+                </div>
+
               </div>
-            </div>
+
+          
 
             <div className="card" style={{ flex: 1 }}>
               <h3 style={{ marginBottom: '.75rem' }}>🔗 Referral via QR</h3>
@@ -218,9 +258,6 @@ export default function HomePage() {
 
             <div className="card" style={{ flex: 1 }}>
               <h3 style={{ marginBottom: '.75rem' }}>⚙️ Admin Panel</h3>
-              <p style={{ fontSize: '.88rem', marginBottom: '1rem' }}>
-                Mark consultations and medicine completions to trigger reward generation.
-              </p>
               <Link to="/admin" className="btn btn-secondary btn-full">Open Admin Dashboard</Link>
             </div>
           </div>
